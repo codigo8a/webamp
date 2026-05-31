@@ -416,7 +416,28 @@ export function addFilesFromUrl(atIndex = 0): Thunk {
         return;
       }
     } else {
-      alert("Not supported in Webamp");
+      const url = window.prompt("Enter the URL of an audio file or stream:");
+      if (url == null || url.trim() === "") {
+        return;
+      }
+      const trimmedUrl = url.trim();
+      // Basic validation: ensure it looks like a URL
+      try {
+        new URL(trimmedUrl);
+      } catch {
+        alert(
+          `Invalid URL: "${trimmedUrl}". Please enter a valid URL (e.g. https://example.com/audio.mp3).`
+        );
+        return;
+      }
+      const tracks: Track[] = [
+        {
+          url: trimmedUrl,
+          defaultName: trimmedUrl.split("/").pop() || "URL Stream",
+          duration: 0, // Streams have unknown duration; skip fetchMediaDuration
+        },
+      ];
+      dispatch(loadMediaFiles(tracks, LOAD_STYLE.NONE, atIndex));
     }
   };
 }

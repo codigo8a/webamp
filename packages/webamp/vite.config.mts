@@ -1,43 +1,30 @@
 import { defineConfig } from "vite";
-import { getPlugins } from "./scripts/rollupPlugins.mjs";
+import { nodeResolve } from "@rollup/plugin-node-resolve";
+import commonjs from "@rollup/plugin-commonjs";
+import nodePolyfills from "rollup-plugin-polyfill-node";
 
 export default defineConfig({
   build: {
     outDir: "../dist/demo-site",
-    chunkSizeWarningLimit: 2500, // Suppress warnings for chunks larger than 500kb
+    chunkSizeWarningLimit: 2500,
   },
   root: "demo",
-  // Used only by the demo site, not the library
+  server: {
+    fs: {
+      allow: [".."],
+    },
+  },
   assetsInclude: ["**/*.wsz", "**/*.mp3"],
   optimizeDeps: {
     include: ["winamp-eqf"],
   },
-  // @ts-ignore
   plugins: [
-    ...getPlugins({
-      minify: true,
-      outputFile: "dist/demo-site/report",
-      vite: true,
+    nodeResolve({
+      browser: true,
+      preferBuiltins: false,
+      dedupe: ["react", "react-dom"],
     }),
-    /*
-    replace({
-      // Ensure we don't use the dev build of React
-      values: { "process.env.NODE_ENV": JSON.stringify("production") },
-      preventAssignment: true,
-    }),
-    nodeResolve(),
-    typescript({
-      compilerOptions: {
-        jsx: "react-jsx",
-        module: "esnext",
-        declarationDir: "dist/declarations",
-      },
-    }),
+    nodePolyfills(),
     commonjs(),
-    babel({ babelHelpers: "bundled" }),
-    */
   ],
-  worker: {
-    rollupOptions: {},
-  },
 });
